@@ -1,6 +1,6 @@
 # WiFi QR Code Generator
 
-A command-line tool that generates a scannable QR code for a WiFi network — scan it with a phone camera and it connects automatically, no typing the password by hand.
+A command line tool that generates a scannable QR code for a WiFi network. Scan it with a phone camera to connect automatically without typing the password by hand.
 
 ## Demo
 
@@ -12,10 +12,10 @@ Scan it with a phone camera to connect automatically.
 
 ## Features
 
-- **WPA/WEP/open network support** — generates the correct QR format for secured or open networks
-- **Special character escaping** — safely handles SSIDs or passwords containing semicolons, colons, or commas without breaking the QR format
-- **Input validation** — rejects invalid encryption types and catches missing passwords before attempting anything
-- **Auto-sizing QR codes** — grid size is calculated automatically based on data length
+- **WPA/WEP/open network support** generates the correct QR format for secured or open networks
+- **Special character escaping** safely handles SSIDs or passwords containing semicolons, colons, or commas without breaking the QR format
+- **Input validation** rejects invalid encryption types and catches missing passwords before attempting anything
+- **Automatic QR sizing** calculates the grid size is calculated automatically based on data length
 
 ## Tech Stack
 
