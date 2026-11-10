@@ -13,7 +13,7 @@ Scan it with a phone camera to connect automatically.
 ## Features
 
 - **WPA/WEP/open network support** generates the correct QR format for secured or open networks
-- **Special character escaping** safely handles SSIDs or passwords containing semicolons, colons, or commas without breaking the QR format
+- **Special character escaping** safely handles SSIDs or passwords containing backslashes, semicolons, commas, colons, or double quotes without breaking the QR format
 - **Input validation** rejects invalid encryption types and catches missing passwords before attempting anything
 - **Automatic QR sizing** calculates the grid size is calculated automatically based on data length
 

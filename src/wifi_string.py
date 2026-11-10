@@ -16,11 +16,15 @@ VALID_ENCRYPTION_TYPES = {"WPA", "WEP", "nopass"}
 def _escape(value: str) -> str:
     """
     Escape characters that have special meaning in the WiFi QR format
-    itself: backslash, semicolon, colon, and comma. Without this, a
-    password like "pass;word" would break the format and could even
-    get misread as a different field entirely.
+    itself: backslash, semicolon, comma, colon, and double quote.
+    The format reserves all five of these characters, so without this,
+    a password like "pass;word" would break the format and could even
+    get misread as a different field entirely, and a value containing
+    a double quote could be misread by scanners that wrap values in
+    quotes. Backslash is escaped first so the backslashes added for
+    the other characters are not escaped again.
     """
-    for char in ("\\", ";", ",", ":"):
+    for char in ("\\", ";", ",", ":", '"'):
         value = value.replace(char, f"\\{char}")
     return value
 

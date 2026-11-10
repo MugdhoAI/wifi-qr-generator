@@ -29,6 +29,17 @@ class TestBuildWifiString(unittest.TestCase):
         self.assertIn("Weird\\;Name", result)
         self.assertIn("pass\\:word", result)
 
+    def test_double_quotes_are_escaped(self):
+        result = build_wifi_string('My "Home" Net', 'say "hi" now', "WPA")
+        self.assertEqual(
+            result,
+            'WIFI:T:WPA;S:My \\"Home\\" Net;P:say \\"hi\\" now;;',
+        )
+
+    def test_all_reserved_characters_are_escaped(self):
+        result = build_wifi_string("Net", 'a\\b;c,d:e"f', "WPA")
+        self.assertIn('P:a\\\\b\\;c\\,d\\:e\\"f', result)
+
     def test_empty_ssid_raises_error(self):
         with self.assertRaises(ValueError):
             build_wifi_string("", "password", "WPA")
