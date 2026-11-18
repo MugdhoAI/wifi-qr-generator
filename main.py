@@ -18,7 +18,8 @@ from src.wifi_string import build_wifi_string
 from src.qr_builder import generate_qr_image
 
 
-def run(ssid: str, password: str, encryption: str, output: str) -> Path:
+def run(ssid: str, password: str, encryption: str, output: str,
+        hidden: bool = False) -> Path:
     """
     Build the WiFi QR string and save it as an image.
 
@@ -27,11 +28,12 @@ def run(ssid: str, password: str, encryption: str, output: str) -> Path:
         password: WiFi password (ignored if encryption is "nopass").
         encryption: "WPA", "WEP", or "nopass".
         output: File path to save the PNG to.
+        hidden: True if the network SSID is hidden (not broadcast).
 
     Returns:
         The path the QR image was saved to.
     """
-    wifi_data = build_wifi_string(ssid, password, encryption)
+    wifi_data = build_wifi_string(ssid, password, encryption, hidden=hidden)
     output_path = Path(output).expanduser().resolve()
     return generate_qr_image(wifi_data, output_path)
 
@@ -53,6 +55,10 @@ def main() -> None:
         "--output", default="wifi_qr.png",
         help="Output PNG file path. Default: wifi_qr.png"
     )
+    parser.add_argument(
+        "--hidden", action="store_true",
+        help="The network SSID is hidden (not broadcast)."
+    )
     args = parser.parse_args()
 
     if args.encryption != "nopass" and not args.password:
@@ -60,7 +66,8 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        saved_path = run(args.ssid, args.password, args.encryption, args.output)
+        saved_path = run(args.ssid, args.password, args.encryption, args.output,
+                         hidden=args.hidden)
     except ValueError as e:
         print(f"Error: {e}")
         sys.exit(1)
