@@ -58,6 +58,14 @@ class TestBuildWifiString(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_wifi_string("Network", "", "WEP")
 
+    def test_wep_network_format(self):
+        result = build_wifi_string("OldRouter", "wepkey123", "WEP")
+        self.assertEqual(result, "WIFI:T:WEP;S:OldRouter;P:wepkey123;;")
+
+    def test_open_network_ignores_password(self):
+        result = build_wifi_string("OpenCafe", "shouldbeignored", "nopass")
+        self.assertEqual(result, "WIFI:T:nopass;S:OpenCafe;;")
+
     def test_empty_ssid_raises_error(self):
         with self.assertRaises(ValueError):
             build_wifi_string("", "password", "WPA")
@@ -83,6 +91,11 @@ class TestGenerateQrImage(unittest.TestCase):
         output_path = self.temp_dir / "test.png"
         result = generate_qr_image("WIFI:T:WPA;S:Test;P:pass;;", output_path)
         self.assertTrue(result.exists())
+
+    def test_generate_qr_image_returns_the_given_path(self):
+        output_path = self.temp_dir / "out.png"
+        result = generate_qr_image("hello", output_path)
+        self.assertEqual(result, output_path)
 
     def test_creates_parent_directories_if_missing(self):
         nested_path = self.temp_dir / "nested" / "folder" / "test.png"
