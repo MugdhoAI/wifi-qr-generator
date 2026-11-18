@@ -5,13 +5,15 @@ Run with:
     python -m unittest discover tests
 """
 
+import contextlib
+import io
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
 from src.wifi_string import build_wifi_string
-from src.qr_builder import generate_qr_image
+from src.qr_builder import generate_qr_image, print_qr_to_terminal
 
 
 class TestBuildWifiString(unittest.TestCase):
@@ -74,6 +76,14 @@ class TestGenerateQrImage(unittest.TestCase):
         nested_path = self.temp_dir / "nested" / "folder" / "test.png"
         result = generate_qr_image("some data", nested_path)
         self.assertTrue(result.exists())
+
+    def test_print_qr_to_terminal_outputs_blocks(self):
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured):
+            print_qr_to_terminal("WIFI:T:WPA;S:Test;P:pass;;")
+        output = captured.getvalue()
+        self.assertTrue(output.strip())
+        self.assertIn("██", output)
 
 
 if __name__ == "__main__":
