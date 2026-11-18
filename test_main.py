@@ -62,6 +62,10 @@ class TestBuildWifiString(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_wifi_string("", "password", "WPA")
 
+    def test_whitespace_only_ssid_raises_error(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("   ", "password", "WPA")
+
     def test_invalid_encryption_raises_error(self):
         with self.assertRaises(ValueError):
             build_wifi_string("Network", "password", "FAKE")

@@ -47,7 +47,7 @@ def build_wifi_string(ssid: str, password: str, encryption: str = "WPA",
     Raises:
         ValueError: If ssid is empty, or encryption isn't a recognized type.
     """
-    if not ssid:
+    if not ssid.strip():
         raise ValueError("SSID cannot be empty.")
 
     if encryption not in VALID_ENCRYPTION_TYPES:
