@@ -19,7 +19,8 @@ from src.qr_builder import generate_qr_image, print_qr_to_terminal
 
 
 def run(ssid: str, password: str, encryption: str, output: str,
-        hidden: bool = False, show: bool = False) -> Path:
+        hidden: bool = False, show: bool = False,
+        fill_color: str = "black", back_color: str = "white") -> Path:
     """
     Build the WiFi QR string and save it as an image.
 
@@ -30,13 +31,17 @@ def run(ssid: str, password: str, encryption: str, output: str,
         output: File path to save the PNG to.
         hidden: True if the network SSID is hidden (not broadcast).
         show: True to also print the QR code to the terminal.
+        fill_color: Color of the dark QR modules.
+        back_color: Color of the light QR background.
 
     Returns:
         The path the QR image was saved to.
     """
     wifi_data = build_wifi_string(ssid, password, encryption, hidden=hidden)
     output_path = Path(output).expanduser().resolve()
-    saved_path = generate_qr_image(wifi_data, output_path)
+    saved_path = generate_qr_image(wifi_data, output_path,
+                                   fill_color=fill_color,
+                                   back_color=back_color)
     if show:
         print_qr_to_terminal(wifi_data)
     return saved_path
@@ -67,6 +72,14 @@ def main() -> None:
         "--show", action="store_true",
         help="Also print the QR code to the terminal."
     )
+    parser.add_argument(
+        "--fill", default="black",
+        help="Color of the dark QR modules. Default: black."
+    )
+    parser.add_argument(
+        "--back", default="white",
+        help="Color of the light QR background. Default: white."
+    )
     args = parser.parse_args()
 
     if args.encryption != "nopass" and not args.password:
@@ -75,7 +88,8 @@ def main() -> None:
 
     try:
         saved_path = run(args.ssid, args.password, args.encryption, args.output,
-                         hidden=args.hidden, show=args.show)
+                         hidden=args.hidden, show=args.show,
+                         fill_color=args.fill, back_color=args.back)
     except ValueError as e:
         print(f"Error: {e}")
         sys.exit(1)

@@ -89,6 +89,15 @@ class TestGenerateQrImage(unittest.TestCase):
         result = generate_qr_image("some data", nested_path)
         self.assertTrue(result.exists())
 
+    def test_custom_colors_produce_a_different_image(self):
+        default_path = self.temp_dir / "default.png"
+        custom_path = self.temp_dir / "custom.png"
+        generate_qr_image("WIFI:T:WPA;S:Test;P:pass;;", default_path)
+        generate_qr_image("WIFI:T:WPA;S:Test;P:pass;;", custom_path,
+                          fill_color="darkblue", back_color="lightyellow")
+        self.assertTrue(custom_path.exists())
+        self.assertNotEqual(default_path.read_bytes(), custom_path.read_bytes())
+
     def test_print_qr_to_terminal_outputs_blocks(self):
         captured = io.StringIO()
         with contextlib.redirect_stdout(captured):
