@@ -50,6 +50,14 @@ class TestBuildWifiString(unittest.TestCase):
         result = build_wifi_string("OpenCafe", "", "nopass", hidden=True)
         self.assertEqual(result, "WIFI:T:nopass;S:OpenCafe;H:true;;")
 
+    def test_empty_password_raises_error_for_wpa(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("Network", "", "WPA")
+
+    def test_empty_password_raises_error_for_wep(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("Network", "", "WEP")
+
     def test_empty_ssid_raises_error(self):
         with self.assertRaises(ValueError):
             build_wifi_string("", "password", "WPA")

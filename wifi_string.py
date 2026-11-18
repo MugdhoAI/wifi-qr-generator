@@ -56,6 +56,9 @@ def build_wifi_string(ssid: str, password: str, encryption: str = "WPA",
             f"Must be one of: {', '.join(sorted(VALID_ENCRYPTION_TYPES))}"
         )
 
+    if encryption != "nopass" and not password:
+        raise ValueError("Password cannot be empty for WPA or WEP networks.")
+
     escaped_ssid = _escape(ssid)
     hidden_field = ";H:true" if hidden else ""
 
