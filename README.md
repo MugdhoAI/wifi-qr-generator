@@ -13,9 +13,12 @@ Scan it with a phone camera to connect automatically.
 ## Features
 
 - **WPA/WEP/open network support** generates the correct QR format for secured or open networks
+- **Hidden network support** adds the `H:true` field for SSIDs that are not broadcast, with `--hidden`
+- **Terminal preview** prints the QR code straight to the terminal with `--show`, no need to open the image file
+- **Custom QR colors** pick the module and background colors with `--fill` and `--back`
 - **Special character escaping** safely handles SSIDs or passwords containing backslashes, semicolons, commas, colons, or double quotes without breaking the QR format
-- **Input validation** rejects invalid encryption types and catches missing passwords before attempting anything
-- **Automatic QR sizing** calculates the grid size is calculated automatically based on data length
+- **Input validation** rejects invalid encryption types, empty or blank SSIDs, and missing passwords for secured networks before attempting anything
+- **Automatic QR sizing** calculates the grid size automatically based on data length
 
 ## Tech Stack
 
@@ -46,6 +49,12 @@ python main.py --ssid "CafeWifi" --encryption nopass --output cafe.png
 
 # WEP network
 python main.py --ssid "OldRouter" --password "wepkey123" --encryption WEP
+
+# Hidden network, with a terminal preview
+python main.py --ssid "HiddenNet" --password "secret123" --hidden --show
+
+# Custom QR colors
+python main.py --ssid "MyNetwork" --password "mypassword" --fill darkblue --back lightyellow
 ```
 
 ## Project Structure
@@ -71,9 +80,10 @@ python -m unittest discover tests
 This project introduced working with an external dependency instead of only the standard library — which meant learning `requirements.txt` so the exact same environment can be recreated on another machine with one command. I also learned why some values (like SSID/password) need character-escaping before being embedded into a structured text format, since unescaped special characters can silently break the format a scanner expects.
 
 ## Future Improvements
-- [ ] Optional terminal preview of the QR code (no need to open the image file)
+- [x] Optional terminal preview of the QR code (added with `--show`)
+- [x] Custom QR code colors (added with `--fill` and `--back`)
 - [ ] Batch mode: generate QR codes for multiple networks from a CSV file
-- [ ] Custom QR code colors/logo embedding
+- [ ] Logo embedding in the QR code
 
 ## Author
 **Mugdho (All Asmaul Husnain)**
