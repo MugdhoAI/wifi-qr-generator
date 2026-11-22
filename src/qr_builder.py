@@ -13,13 +13,34 @@ from pathlib import Path
 import qrcode
 
 
-def generate_qr_image(data: str, output_path: Path) -> Path:
+def print_qr_to_terminal(data: str) -> None:
+    """
+    Print the QR code for `data` to the terminal as text blocks,
+    so the code can be scanned straight from the screen without
+    opening the saved image file.
+    """
+    qr = qrcode.QRCode(
+        version=None,          # None = auto-size based on data length
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        border=1,              # keep the printed code compact
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+    qr.print_ascii()
+
+
+def generate_qr_image(data: str, output_path: Path,
+                      fill_color: str = "black",
+                      back_color: str = "white") -> Path:
     """
     Generate a QR code image encoding `data` and save it as a PNG.
 
     Args:
         data: The text to encode (e.g. a WIFI: connection string).
         output_path: Where to save the PNG file.
+        fill_color: Color of the dark QR modules. Any Pillow color
+            name or hex value, such as "darkblue" or "#1a365d".
+        back_color: Color of the light background, same format.
 
     Returns:
         The path the image was saved to (same as output_path, returned
@@ -34,7 +55,7 @@ def generate_qr_image(data: str, output_path: Path) -> Path:
     qr.add_data(data)
     qr.make(fit=True)
 
-    image = qr.make_image(fill_color="black", back_color="white")
+    image = qr.make_image(fill_color=fill_color, back_color=back_color)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     image.save(output_path)
 
