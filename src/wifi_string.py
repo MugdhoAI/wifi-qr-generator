@@ -29,7 +29,8 @@ def _escape(value: str) -> str:
     return value
 
 
-def build_wifi_string(ssid: str, password: str, encryption: str = "WPA") -> str:
+def build_wifi_string(ssid: str, password: str, encryption: str = "WPA",
+                      hidden: bool = False) -> str:
     """
     Build the WIFI: string that phone QR scanners recognize.
 
@@ -37,6 +38,8 @@ def build_wifi_string(ssid: str, password: str, encryption: str = "WPA") -> str:
         ssid: The WiFi network name.
         password: The WiFi password. Ignored if encryption is "nopass".
         encryption: One of "WPA", "WEP", or "nopass" (open network).
+        hidden: True if the network SSID is hidden (not broadcast),
+            which adds the H:true field scanners use to find it.
 
     Returns:
         A string like "WIFI:T:WPA;S:MyNetwork;P:mypassword;;"
@@ -44,7 +47,7 @@ def build_wifi_string(ssid: str, password: str, encryption: str = "WPA") -> str:
     Raises:
         ValueError: If ssid is empty, or encryption isn't a recognized type.
     """
-    if not ssid:
+    if not ssid.strip():
         raise ValueError("SSID cannot be empty.")
 
     if encryption not in VALID_ENCRYPTION_TYPES:
@@ -53,13 +56,17 @@ def build_wifi_string(ssid: str, password: str, encryption: str = "WPA") -> str:
             f"Must be one of: {', '.join(sorted(VALID_ENCRYPTION_TYPES))}"
         )
 
+    if encryption != "nopass" and not password:
+        raise ValueError("Password cannot be empty for WPA or WEP networks.")
+
     escaped_ssid = _escape(ssid)
+    hidden_field = ";H:true" if hidden else ""
 
     if encryption == "nopass":
         # Open networks have no password field at all — including an
         # empty P: field would confuse some scanners into thinking
         # there IS a password (just blank), rather than no security.
-        return f"WIFI:T:nopass;S:{escaped_ssid};;"
+        return f"WIFI:T:nopass;S:{escaped_ssid}{hidden_field};;"
 
     escaped_password = _escape(password)
-    return f"WIFI:T:{encryption};S:{escaped_ssid};P:{escaped_password};;"
+    return f"WIFI:T:{encryption};S:{escaped_ssid};P:{escaped_password}{hidden_field};;"

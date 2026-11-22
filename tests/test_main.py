@@ -5,13 +5,15 @@ Run with:
     python -m unittest discover tests
 """
 
+import contextlib
+import io
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
 from src.wifi_string import build_wifi_string
-from src.qr_builder import generate_qr_image
+from src.qr_builder import generate_qr_image, print_qr_to_terminal
 
 
 class TestBuildWifiString(unittest.TestCase):
@@ -40,9 +42,37 @@ class TestBuildWifiString(unittest.TestCase):
         result = build_wifi_string("Net", 'a\\b;c,d:e"f', "WPA")
         self.assertIn('P:a\\\\b\\;c\\,d\\:e\\"f', result)
 
+    def test_hidden_network_adds_hidden_field(self):
+        result = build_wifi_string("MyNetwork", "mypassword", "WPA", hidden=True)
+        self.assertEqual(result, "WIFI:T:WPA;S:MyNetwork;P:mypassword;H:true;;")
+
+    def test_hidden_open_network_adds_hidden_field(self):
+        result = build_wifi_string("OpenCafe", "", "nopass", hidden=True)
+        self.assertEqual(result, "WIFI:T:nopass;S:OpenCafe;H:true;;")
+
+    def test_empty_password_raises_error_for_wpa(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("Network", "", "WPA")
+
+    def test_empty_password_raises_error_for_wep(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("Network", "", "WEP")
+
+    def test_wep_network_format(self):
+        result = build_wifi_string("OldRouter", "wepkey123", "WEP")
+        self.assertEqual(result, "WIFI:T:WEP;S:OldRouter;P:wepkey123;;")
+
+    def test_open_network_ignores_password(self):
+        result = build_wifi_string("OpenCafe", "shouldbeignored", "nopass")
+        self.assertEqual(result, "WIFI:T:nopass;S:OpenCafe;;")
+
     def test_empty_ssid_raises_error(self):
         with self.assertRaises(ValueError):
             build_wifi_string("", "password", "WPA")
+
+    def test_whitespace_only_ssid_raises_error(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("   ", "password", "WPA")
 
     def test_invalid_encryption_raises_error(self):
         with self.assertRaises(ValueError):
@@ -62,10 +92,32 @@ class TestGenerateQrImage(unittest.TestCase):
         result = generate_qr_image("WIFI:T:WPA;S:Test;P:pass;;", output_path)
         self.assertTrue(result.exists())
 
+    def test_generate_qr_image_returns_the_given_path(self):
+        output_path = self.temp_dir / "out.png"
+        result = generate_qr_image("hello", output_path)
+        self.assertEqual(result, output_path)
+
     def test_creates_parent_directories_if_missing(self):
         nested_path = self.temp_dir / "nested" / "folder" / "test.png"
         result = generate_qr_image("some data", nested_path)
         self.assertTrue(result.exists())
+
+    def test_custom_colors_produce_a_different_image(self):
+        default_path = self.temp_dir / "default.png"
+        custom_path = self.temp_dir / "custom.png"
+        generate_qr_image("WIFI:T:WPA;S:Test;P:pass;;", default_path)
+        generate_qr_image("WIFI:T:WPA;S:Test;P:pass;;", custom_path,
+                          fill_color="darkblue", back_color="lightyellow")
+        self.assertTrue(custom_path.exists())
+        self.assertNotEqual(default_path.read_bytes(), custom_path.read_bytes())
+
+    def test_print_qr_to_terminal_outputs_blocks(self):
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured):
+            print_qr_to_terminal("WIFI:T:WPA;S:Test;P:pass;;")
+        output = captured.getvalue()
+        self.assertTrue(output.strip())
+        self.assertIn("██", output)
 
 
 if __name__ == "__main__":
