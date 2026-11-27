@@ -45,10 +45,17 @@ def build_wifi_string(ssid: str, password: str, encryption: str = "WPA",
         A string like "WIFI:T:WPA;S:MyNetwork;P:mypassword;;"
 
     Raises:
-        ValueError: If ssid is empty, or encryption isn't a recognized type.
+        ValueError: If ssid is empty or longer than 32 bytes, or
+            encryption isn't a recognized type.
     """
     if not ssid.strip():
         raise ValueError("SSID cannot be empty.")
+
+    # The 802.11 standard limits SSIDs to 32 octets. The limit is in
+    # bytes, not characters, so a name with multibyte characters
+    # reaches it sooner than its character count suggests.
+    if len(ssid.encode("utf-8")) > 32:
+        raise ValueError("SSID cannot be longer than 32 bytes.")
 
     if encryption not in VALID_ENCRYPTION_TYPES:
         raise ValueError(
