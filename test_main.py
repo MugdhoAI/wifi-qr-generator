@@ -78,6 +78,45 @@ class TestBuildWifiString(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_wifi_string("Network", "password", "FAKE")
 
+    def test_ssid_of_exactly_32_bytes_is_accepted(self):
+        result = build_wifi_string("A" * 32, "mypassword", "WPA")
+        self.assertIn("S:" + "A" * 32, result)
+
+    def test_ssid_longer_than_32_bytes_raises_error(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("A" * 33, "mypassword", "WPA")
+
+    def test_ssid_length_counts_utf8_bytes_not_characters(self):
+        # 16 accented characters are 32 bytes, 17 are 34 bytes.
+        result = build_wifi_string("é" * 16, "mypassword", "WPA")
+        self.assertIn("S:" + "é" * 16, result)
+        with self.assertRaises(ValueError):
+            build_wifi_string("é" * 17, "mypassword", "WPA")
+
+    def test_wpa_password_shorter_than_8_raises_error(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("Network", "short12", "WPA")
+
+    def test_wpa_password_of_8_characters_is_accepted(self):
+        result = build_wifi_string("Network", "12345678", "WPA")
+        self.assertIn("P:12345678", result)
+
+    def test_wpa_password_of_63_characters_is_accepted(self):
+        result = build_wifi_string("Network", "a" * 63, "WPA")
+        self.assertIn("P:" + "a" * 63, result)
+
+    def test_wpa_password_of_64_hex_characters_is_accepted(self):
+        result = build_wifi_string("Network", "0123456789abcdef" * 4, "WPA")
+        self.assertIn("P:" + "0123456789abcdef" * 4, result)
+
+    def test_wpa_password_of_64_non_hex_characters_raises_error(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("Network", "g" * 64, "WPA")
+
+    def test_wpa_password_longer_than_64_raises_error(self):
+        with self.assertRaises(ValueError):
+            build_wifi_string("Network", "a" * 65, "WPA")
+
 
 class TestGenerateQrImage(unittest.TestCase):
 
