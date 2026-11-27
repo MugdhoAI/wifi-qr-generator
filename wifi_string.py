@@ -29,6 +29,24 @@ def _escape(value: str) -> str:
     return value
 
 
+def _validate_wpa_password(password: str) -> None:
+    """
+    Check a WPA password against the passphrase rules: 8 to 63
+    characters, or exactly 64 hexadecimal characters when it is a
+    raw pre-shared key instead of a passphrase. Anything else can
+    never connect, so it is rejected here instead of producing a
+    QR code that silently fails when scanned.
+    """
+    if len(password) == 64:
+        if all(char in "0123456789abcdefABCDEF" for char in password):
+            return
+        raise ValueError(
+            "A 64 character WPA password must be a hexadecimal pre-shared key."
+        )
+    if not 8 <= len(password) <= 63:
+        raise ValueError("WPA password must be between 8 and 63 characters.")
+
+
 def build_wifi_string(ssid: str, password: str, encryption: str = "WPA",
                       hidden: bool = False) -> str:
     """
@@ -65,6 +83,9 @@ def build_wifi_string(ssid: str, password: str, encryption: str = "WPA",
 
     if encryption != "nopass" and not password:
         raise ValueError("Password cannot be empty for WPA or WEP networks.")
+
+    if encryption == "WPA":
+        _validate_wpa_password(password)
 
     escaped_ssid = _escape(ssid)
     hidden_field = ";H:true" if hidden else ""
