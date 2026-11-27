@@ -17,7 +17,7 @@ Scan it with a phone camera to connect automatically.
 - **Terminal preview** prints the QR code straight to the terminal with `--show`, no need to open the image file
 - **Custom QR colors** pick the module and background colors with `--fill` and `--back`
 - **Special character escaping** safely handles SSIDs or passwords containing backslashes, semicolons, commas, colons, or double quotes without breaking the QR format
-- **Input validation** rejects invalid encryption types, empty or blank SSIDs, and missing passwords for secured networks before attempting anything
+- **Input validation** rejects invalid encryption types, empty or blank SSIDs, and missing passwords for secured networks before attempting anything. SSIDs are limited to 32 bytes (the 802.11 limit, counted in UTF-8 bytes), and WPA passwords must be 8 to 63 characters, or a 64 character hexadecimal pre-shared key
 - **Automatic QR sizing** calculates the grid size automatically based on data length
 
 ## Tech Stack
@@ -71,6 +71,10 @@ wifi-qr-generator/
 ```
 
 ## Running Tests
+```bash
+python -m pytest
+```
+or with the standard library only:
 ```bash
 python -m unittest discover tests
 ```
